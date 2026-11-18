@@ -1,0 +1,25 @@
+@page
+@model CreateModel
+@{
+    ViewData["Title"] = "Nova tarefa";
+}
+
+<section class="page-heading compact">
+    <p class="eyebrow">Nova tarefa</p>
+    <h1>Transforme uma ideia em próximo passo.</h1>
+</section>
+
+<section class="panel form-panel">
+    <form method="post" class="task-form">
+        <partial name="_TaskForm" for="Input" />
+
+        <div class="form-actions">
+            <a class="button button-ghost" asp-page="/Index">Cancelar</a>
+            <button class="button button-primary" type="submit">Criar tarefa</button>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

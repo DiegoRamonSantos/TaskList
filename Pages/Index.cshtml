@@ -1,0 +1,300 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<section class="dashboard-hero" aria-labelledby="dashboard-title">
+    <div class="hero-copy">
+        <span class="welcome-pill">Bem-vindo de volta</span>
+        <h1 id="dashboard-title">Organize seu dia com mais clareza</h1>
+        <p>Gerencie suas tarefas, defina prioridades e acompanhe prazos para manter tudo em dia e alcançar seus objetivos.</p>
+        <div class="hero-actions">
+            <a class="button button-primary" asp-page="/Tasks/Create">
+                <span class="button-icon" aria-hidden="true">+</span>
+                Criar tarefa
+            </a>
+            <a class="button button-ghost" asp-page="/Tasks/Index">
+                <span class="button-icon list-icon" aria-hidden="true"></span>
+                Ver tarefas
+            </a>
+        </div>
+    </div>
+
+    <aside class="today-panel panel" aria-label="Resumo de hoje">
+        <div class="panel-heading">
+            <h2>Resumo de hoje</h2>
+            <a asp-page="/Tasks/Index">Ver tudo</a>
+        </div>
+
+        <div class="today-summary">
+            <div>
+                <strong>@Model.Statistics.Pending</strong>
+                <span>Pendentes</span>
+            </div>
+            <div>
+                <strong>@Model.InProgress</strong>
+                <span>Em andamento</span>
+            </div>
+            <div>
+                <strong>@Model.Statistics.Completed</strong>
+                <span>Concluídas</span>
+            </div>
+            <div class="progress-ring" style="--progress: @Model.CompletionPercentage;%" aria-label="@Model.CompletionPercentage% concluído">
+                <strong>@Model.CompletionPercentage%</strong>
+                <span>Concluído</span>
+            </div>
+        </div>
+
+        <div class="mini-task-list">
+            <div class="mini-task-heading">
+                <strong>Próximas tarefas</strong>
+                <span>@Model.DueToday para hoje</span>
+            </div>
+
+            @if (Model.NextTasks.Count == 0)
+            {
+                <p class="empty-copy">Nenhuma tarefa pendente por enquanto.</p>
+            }
+            else
+            {
+                @foreach (var task in Model.NextTasks)
+                {
+                    <a class="mini-task-row" asp-page="/Tasks/Edit" asp-route-id="@task.Id">
+                        <span class="activity-icon priority-icon @task.Priority.ToCssClass()" role="img" aria-label="Prioridade @task.Priority.ToDisplayName()" title="Prioridade @task.Priority.ToDisplayName()"></span>
+                        <span>@task.Title</span>
+                        <time>@Model.GetDueLabel(task.DueDate)</time>
+                    </a>
+                }
+            }
+        </div>
+    </aside>
+</section>
+
+<section class="metric-grid" aria-label="Indicadores principais">
+    <article class="metric-card">
+        <span class="metric-icon metric-blue" aria-hidden="true"></span>
+        <div>
+            <p>Total de tarefas</p>
+            <strong>@Model.Statistics.Total</strong>
+            <small>@Model.CompletionPercentage% concluídas</small>
+        </div>
+    </article>
+    <article class="metric-card">
+        <span class="metric-icon metric-green" aria-hidden="true"></span>
+        <div>
+            <p>Concluídas</p>
+            <strong>@Model.Statistics.Completed</strong>
+            <small>Progresso acumulado</small>
+        </div>
+    </article>
+    <article class="metric-card">
+        <span class="metric-icon metric-orange" aria-hidden="true"></span>
+        <div>
+            <p>Pendentes</p>
+            <strong>@Model.Statistics.Pending</strong>
+            <small>@Model.DueToday com prazo hoje</small>
+        </div>
+    </article>
+    <article class="metric-card">
+        <span class="metric-icon metric-red" aria-hidden="true"></span>
+        <div>
+            <p>Prioridade alta</p>
+            <strong>@Model.HighPriority</strong>
+            <small>Pedem atenção primeiro</small>
+        </div>
+    </article>
+</section>
+
+<section class="dashboard-grid">
+    <article class="panel task-overview">
+        <div class="panel-heading">
+            <h2>Minhas tarefas</h2>
+            <a asp-page="/Tasks/Index">Abrir lista</a>
+        </div>
+
+        <div class="status-tabs" role="tablist" aria-label="Resumo por status">
+            @for (var index = 0; index < Model.TaskGroups.Count; index++)
+            {
+                var group = Model.TaskGroups[index];
+                var isActive = index == 0;
+
+                <button class="status-tab @(isActive ? "is-active" : string.Empty)"
+                        type="button"
+                        role="tab"
+                        id="tasks-tab-@group.Key"
+                        aria-controls="tasks-panel-@group.Key"
+                        aria-selected="@isActive.ToString().ToLowerInvariant()"
+                        tabindex="@(isActive ? "0" : "-1")"
+                        data-task-filter-tab="@group.Key">
+                    @group.Title
+                    <span>@group.Tasks.Count</span>
+                </button>
+            }
+        </div>
+
+        <div class="task-overview-panels" data-task-filter-panels>
+            @for (var index = 0; index < Model.TaskGroups.Count; index++)
+            {
+                var group = Model.TaskGroups[index];
+                var isActive = index == 0;
+
+                <div class="task-overview-panel @(isActive ? "is-active" : string.Empty)"
+                     id="tasks-panel-@group.Key"
+                     role="tabpanel"
+                     aria-labelledby="tasks-tab-@group.Key"
+                     data-task-filter-panel="@group.Key"
+                     hidden="@(!isActive)">
+                    @if (group.Tasks.Count == 0)
+                    {
+                        <div class="dashboard-empty">
+                            <h3>Nenhuma tarefa encontrada.</h3>
+                            <p>Crie uma nova tarefa para iniciar seu planejamento.</p>
+                            <a class="button button-primary button-small" asp-page="/Tasks/Create">Nova tarefa</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="task-overview-list">
+                            @foreach (var task in group.Tasks)
+                            {
+                                <a class="task-overview-row" asp-page="/Tasks/Edit" asp-route-id="@task.Id">
+                                    <span class="activity-icon priority-icon @task.Priority.ToCssClass()" role="img" aria-label="Prioridade @task.Priority.ToDisplayName()" title="Prioridade @task.Priority.ToDisplayName()"></span>
+                                    <span class="task-overview-title">
+                                        <strong>@task.Title</strong>
+                                        <small>@(string.IsNullOrWhiteSpace(task.Description) ? "Sem descrição" : task.Description)</small>
+                                    </span>
+                                    <time>@Model.GetDueLabel(task.DueDate)</time>
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </article>
+
+    <aside class="panel deadlines-panel">
+        <div class="panel-heading">
+            <h2>Próximos prazos</h2>
+            <a asp-page="/Tasks/Index">Ver Tudo</a>
+        </div>
+
+        @if (Model.UpcomingDeadlines.Count == 0)
+        {
+            <p class="empty-copy">Nenhum prazo definido nas tarefas pendentes.</p>
+        }
+        else
+        {
+            <div class="deadline-list">
+                @foreach (var task in Model.UpcomingDeadlines)
+                {
+                    <a class="deadline-item" asp-page="/Tasks/Edit" asp-route-id="@task.Id">
+                        <time class="date-tile" datetime="@task.DueDate?.ToString("yyyy-MM-dd")">
+                            <span>@task.DueDate?.ToString("dd")</span>
+                            <small>@task.DueDate?.ToString("MM")</small>
+                        </time>
+                        <span>
+                            <strong>@task.Title</strong>
+                            <small>@Model.GetDueLabel(task.DueDate) - @task.Priority.ToDisplayName()</small>
+                        </span>
+                    </a>
+                }
+            </div>
+        }
+    </aside>
+
+    <article class="panel activity-board-panel">
+        <div class="panel-heading">
+            <h2>Quadro de atividades</h2>
+            <a asp-page="/Tasks/Create">Adicionar tarefa</a>
+        </div>
+
+        <div class="activity-board" aria-label="Quadro responsivo de tarefas">
+            @foreach (var column in Model.BoardColumns)
+            {
+                <section class="board-column board-@column.Tone" aria-labelledby="board-@column.Tone">
+                    <header>
+                        <h3 id="board-@column.Tone">@column.Title</h3>
+                        <span>@column.Count</span>
+                    </header>
+
+                    <div class="board-task-list">
+                        @if (column.Tasks.Count == 0)
+                        {
+                            <p class="board-empty">Sem tarefas nesta coluna.</p>
+                        }
+                        else
+                        {
+                            @foreach (var task in column.Tasks)
+                            {
+                                <a class="board-task" asp-page="/Tasks/Edit" asp-route-id="@task.Id">
+                                    <span class="board-task-heading">
+                                        <span class="activity-icon priority-icon @task.Priority.ToCssClass()" role="img" aria-label="Prioridade @task.Priority.ToDisplayName()" title="Prioridade @task.Priority.ToDisplayName()"></span>
+                                        <strong>@task.Title</strong>
+                                    </span>
+                                    <small>@(string.IsNullOrWhiteSpace(task.Description) ? Model.GetDueLabel(task.DueDate) : task.Description)</small>
+                                </a>
+                            }
+                        }
+                    </div>
+
+                </section>
+            }
+        </div>
+    </article>
+
+    <aside class="panel recent-panel">
+        <div class="panel-heading">
+            <h2>Atividade recente</h2>
+            <a asp-page="/Tasks/Index">Ver tudo</a>
+        </div>
+
+        @if (Model.RecentActivities.Count == 0)
+        {
+            <p class="empty-copy">As atividades recentes aparecerão aqui.</p>
+        }
+        else
+        {
+            <div class="activity-feed">
+                @foreach (var activity in Model.RecentActivities)
+                {
+                    <div class="activity-item activity-@activity.Tone">
+                        <span class="activity-icon" aria-hidden="true"></span>
+                        <p>
+                            <strong>@activity.Action</strong>
+                            <span>@activity.TaskTitle</span>
+                        </p>
+                        <time>@Model.FormatRelativeTime(activity.OccurredAt)</time>
+                    </div>
+                }
+            </div>
+        }
+    </aside>
+</section>
+
+<section class="help-panel panel" aria-labelledby="help-title">
+    <h2 id="help-title">Como o TaskFlow pode te ajudar</h2>
+    <div class="help-grid">
+        <article>
+            <span class="help-icon help-blue" aria-hidden="true"></span>
+            <strong>Planeje melhor</strong>
+            <p>Crie tarefas com descrições, prioridades e prazos definidos.</p>
+        </article>
+        <article>
+            <span class="help-icon help-purple" aria-hidden="true"></span>
+            <strong>Priorize o que importa</strong>
+            <p>Organize por prioridade e foque no que realmente faz diferenca.</p>
+        </article>
+        <article>
+            <span class="help-icon help-orange" aria-hidden="true"></span>
+            <strong>Acompanhe o progresso</strong>
+            <p>Use indicadores e quadros para visualizar o andamento em tempo real.</p>
+        </article>
+        <article>
+            <span class="help-icon help-green" aria-hidden="true"></span>
+            <strong>Conclua com consistência</strong>
+            <p>Mantenha sua lista atualizada e celebre suas conquistas.</p>
+        </article>
+    </div>
+</section>

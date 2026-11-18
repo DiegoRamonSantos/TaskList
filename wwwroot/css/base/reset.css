@@ -1,0 +1,59 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    scrollbar-color: var(--color-scroll-thumb) var(--color-scroll-track);
+    scrollbar-width: thin;
+}
+
+::-webkit-scrollbar {
+    width: 0.72rem;
+    height: 0.72rem;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--color-scroll-track);
+}
+
+::-webkit-scrollbar-thumb {
+    border: 2px solid var(--color-scroll-track);
+    border-radius: 999px;
+    background: var(--color-scroll-thumb);
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    color: var(--color-text);
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(180deg, var(--color-page-start) 0%, var(--color-page) 42%, var(--color-page-end) 100%);
+    background-attachment: fixed;
+    transition: color 180ms ease, background 180ms ease;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    border: 0;
+}
+
+a {
+    color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+::selection {
+    color: var(--color-white);
+    background: rgba(var(--color-work-rgb), 0.76);
+}

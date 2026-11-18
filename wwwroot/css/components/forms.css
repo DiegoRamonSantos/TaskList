@@ -1,0 +1,132 @@
+.filter-bar,
+.form-grid,
+.task-form {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.filter-bar {
+    padding: var(--space-3);
+    gap: 1.25rem 1rem;
+}
+
+.field {
+    display: grid;
+    gap: var(--space-1);
+}
+
+.field label {
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    font-weight: 800;
+}
+
+.input {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    outline: none;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.input:focus {
+    border-color: rgba(var(--color-work-rgb), 0.62);
+    background: var(--color-surface);
+    box-shadow: 0 0 0 4px rgba(var(--color-work-rgb), 0.14);
+}
+
+.input::placeholder {
+    color: var(--color-placeholder);
+}
+
+select.input {
+    cursor: pointer;
+}
+
+select.input option {
+    color: var(--color-text);
+}
+
+.textarea {
+    min-height: 8.5rem;
+    resize: none;
+}
+
+.filter-actions,
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.filter-actions {
+    align-items: end;
+    justify-content: stretch;
+}
+
+.filter-actions .button {
+    flex: 1 1 9rem;
+    min-height: 3rem;
+}
+
+.form-panel,
+.delete-panel {
+    max-width: 820px;
+    padding: var(--space-3);
+}
+
+.form-actions {
+    justify-content: flex-end;
+    margin-top: var(--space-3);
+}
+
+.validation-message,
+.field-validation-error {
+    color: var(--color-danger);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.input-validation-error {
+    border-color: rgba(var(--color-family-rgb), 0.85);
+}
+
+.validation-summary-errors {
+    color: var(--color-danger);
+}
+
+@media (min-width: 680px) {
+    .filter-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        padding: var(--space-4);
+        gap: 1.35rem 1rem;
+    }
+
+    .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field-wide,
+    .search-field,
+    .filter-actions {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (min-width: 1040px) {
+    .filter-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filter-actions {
+        grid-column: 1 / -1;
+    }
+
+    .filter-actions {
+        flex-wrap: nowrap;
+    }
+}

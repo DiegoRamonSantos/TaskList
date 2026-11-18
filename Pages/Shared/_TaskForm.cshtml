@@ -1,0 +1,32 @@
+@model TaskItemInputModel
+
+<div class="form-grid">
+    <div class="field field-wide">
+        <label asp-for="Title"></label>
+        <input asp-for="Title" class="input" autocomplete="off" maxlength="60" placeholder="Ex: Revisar proposta do cliente" />
+        <span asp-validation-for="Title" class="validation-message"></span>
+    </div>
+
+    <div class="field field-wide">
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description" class="input textarea" rows="5" maxlength="200" placeholder="Notas, contexto ou próximos passos"></textarea>
+        <span asp-validation-for="Description" class="validation-message"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="Priority"></label>
+        <select asp-for="Priority" class="input">
+            @foreach (var priority in Enum.GetValues<TaskPriority>())
+            {
+                <option value="@priority">@priority.ToDisplayName()</option>
+            }
+        </select>
+        <span asp-validation-for="Priority" class="validation-message"></span>
+    </div>
+
+    <div class="field">
+        <label asp-for="DueDate"></label>
+        <input asp-for="DueDate" class="input" type="date" />
+        <span asp-validation-for="DueDate" class="validation-message"></span>
+    </div>
+</div>

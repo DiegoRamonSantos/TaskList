@@ -1,0 +1,139 @@
+@page
+@model Tasklist.Pages.Tasks.IndexModel
+@{
+    ViewData["Title"] = "Tarefas";
+}
+
+<section class="page-heading compact">
+    <p class="eyebrow">Tarefas</p>
+    <h1>Consulte e ajuste suas atividades.</h1>
+</section>
+
+<section class="panel filter-panel">
+    <form class="filter-bar" method="get">
+        <div class="field search-field">
+            <label asp-for="Filters.Search">Busca</label>
+            <input asp-for="Filters.Search" class="input" placeholder="Título ou descrição" />
+        </div>
+
+        <div class="field">
+            <label asp-for="Filters.Status">Status</label>
+            <select asp-for="Filters.Status" class="input">
+                @foreach (var status in Enum.GetValues<TaskStatusFilter>())
+                {
+                    <option value="@status">@status.ToDisplayName()</option>
+                }
+            </select>
+        </div>
+
+        <div class="field">
+            <label asp-for="Filters.Priority">Prioridade</label>
+            <select asp-for="Filters.Priority" class="input">
+                <option value="">Todas</option>
+                @foreach (var priority in Enum.GetValues<TaskPriority>())
+                {
+                    <option value="@priority">@priority.ToDisplayName()</option>
+                }
+            </select>
+        </div>
+
+        <div class="field">
+            <label asp-for="Filters.DueFrom">Prazo inicial</label>
+            <input asp-for="Filters.DueFrom" class="input" type="date" />
+        </div>
+
+        <div class="field">
+            <label asp-for="Filters.DueTo">Prazo final</label>
+            <input asp-for="Filters.DueTo" class="input" type="date" />
+        </div>
+
+        <div class="field sort-field">
+            <label asp-for="Filters.Sort">Ordenar</label>
+            <select asp-for="Filters.Sort" class="input">
+                @foreach (var sort in Enum.GetValues<TaskSortOption>())
+                {
+                    <option value="@sort">@sort.ToDisplayName()</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button class="button button-primary" type="submit">Filtrar</button>
+            <a class="button button-ghost" asp-page="/Tasks/Index">Limpar</a>
+        </div>
+    </form>
+</section>
+
+<section class="task-list" aria-label="Tarefas cadastradas">
+    @if (Model.Tasks.Count == 0)
+    {
+        <article class="empty-state">
+            <h2>Nenhuma tarefa encontrada.</h2>
+            <p>Crie uma tarefa ou ajuste os filtros para trazer o fluxo de volta.</p>
+            <a class="button button-primary" asp-page="/Tasks/Create">Nova tarefa</a>
+        </article>
+    }
+    else
+    {
+        <div class="task-table-panel">
+            <div class="task-table-scroll" tabindex="0">
+                <table class="task-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="task-check-column">Status</th>
+                            <th scope="col">Tarefa</th>
+                            <th scope="col">Prioridade</th>
+                            <th scope="col">Criada em</th>
+                            <th scope="col">Prazo</th>
+                            <th scope="col" class="task-actions-column">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var task in Model.Tasks)
+                        {
+                            var isOverdue = task.DueDate.HasValue && !task.IsCompleted && task.DueDate.Value.Date < DateTime.Today;
+                            <tr class="task-row @(task.IsCompleted ? "is-completed" : string.Empty)" data-task-card>
+                                <td data-label="Status">
+                                    <form method="post" asp-page-handler="Toggle" asp-route-id="@task.Id" class="toggle-form">
+                                        <input type="hidden" asp-for="Filters.Search" />
+                                        <input type="hidden" asp-for="Filters.Status" />
+                                        <input type="hidden" asp-for="Filters.Priority" />
+                                        <input type="hidden" asp-for="Filters.DueFrom" />
+                                        <input type="hidden" asp-for="Filters.DueTo" />
+                                        <input type="hidden" asp-for="Filters.Sort" />
+                                        <button class="task-toggle" type="submit" aria-label="Alternar conclusão de @task.Title">
+                                            <span></span>
+                                        </button>
+                                    </form>
+                                </td>
+                                <td data-label="Tarefa" class="task-main-cell">
+                                    <div class="task-title-row">
+                                        <h2>@task.Title</h2>
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <p>@task.Description</p>
+                                    }
+                                </td>
+                                <td data-label="Prioridade">
+                                    <span class="priority-badge @task.Priority.ToCssClass()">@task.Priority.ToDisplayName()</span>
+                                </td>
+                                <td data-label="Criada em" class="task-date-cell">@task.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                <td data-label="Prazo" class="task-date-cell @(isOverdue ? "text-danger" : string.Empty)">
+                                    @(task.DueDate.HasValue ? task.DueDate.Value.ToString("dd/MM/yyyy") : "Sem prazo")
+                                </td>
+                                <td data-label="Ações">
+                                    <div class="task-actions">
+                                        <a class="icon-link" asp-page="/Tasks/Edit" asp-route-id="@task.Id" aria-label="Editar @task.Title">Editar</a>
+                                        <a class="icon-link danger" asp-page="/Tasks/Delete" asp-route-id="@task.Id" aria-label="Excluir @task.Title">Excluir</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</section>

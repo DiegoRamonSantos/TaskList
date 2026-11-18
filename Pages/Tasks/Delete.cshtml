@@ -1,0 +1,30 @@
+@page "{id:int}"
+@model DeleteModel
+@{
+    ViewData["Title"] = "Excluir tarefa";
+}
+
+<section class="page-heading compact">
+    <p class="eyebrow">Excluir tarefa</p>
+    <h1>Remover este item do fluxo?</h1>
+</section>
+
+<section class="panel delete-panel">
+    @if (Model.TaskItem is not null)
+    {
+        <article class="delete-card">
+            <span class="priority-badge @Model.TaskItem.Priority.ToCssClass()">@Model.TaskItem.Priority.ToDisplayName()</span>
+            <h2>@Model.TaskItem.Title</h2>
+            @if (!string.IsNullOrWhiteSpace(Model.TaskItem.Description))
+            {
+                <p>@Model.TaskItem.Description</p>
+            }
+            <p class="task-meta">Criada em @Model.TaskItem.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</p>
+        </article>
+
+        <form method="post" class="form-actions">
+            <a class="button button-ghost" asp-page="/Index">Cancelar</a>
+            <button class="button button-danger" type="submit">Excluir tarefa</button>
+        </form>
+    }
+</section>
